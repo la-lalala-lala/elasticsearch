@@ -2,11 +2,14 @@ package ac.cn.saya.elasticsearch.api.document;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,10 +35,17 @@ public class QueryTest {
         Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
         // 获取客户流对象
         client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("172.20.1.91"),9300));
+        client.addTransportAddress(new TransportAddress(InetAddress.getByName("103.46.128.20"),36921));
     }
 
-    // 查询所有
+    @After
+    public void closeClient(){
+        client.close();
+    }
+
+    /**
+     * MatchAll 查询所有
+     */
     @Test
     public void queryMatchAll(){
         // 查询
@@ -49,8 +59,24 @@ public class QueryTest {
         while (iterator.hasNext()){
             System.out.println((iterator.next()).getSourceAsString());
         }
-        // 关闭资源
-        client.close();
+    }
+
+    /**
+     * range查询
+     */
+    @Test
+    public void queryRange(){
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("id").gte(0).lte(10);
+        SearchResponse response = client.prepareSearch("news").setTypes("article").setQuery(rangeQueryBuilder).get();
+        // 获取查询的对象（文档）
+        SearchHits hits = response.getHits();
+        // 打印查询结果条目
+        System.out.println("查询结果为："+hits.getTotalHits());
+        // 遍历打印文档内容
+        Iterator<SearchHit> iterator = hits.iterator();
+        while (iterator.hasNext()){
+            System.out.println((iterator.next()).getSourceAsString());
+        }
     }
 
     // 对所有字段分词查询
@@ -67,15 +93,13 @@ public class QueryTest {
         while (iterator.hasNext()){
             System.out.println((iterator.next()).getSourceAsString());
         }
-        // 关闭资源
-        client.close();
     }
 
     // 词条查询
     @Test
     public void queryTermQuery(){
         // 查询
-        SearchResponse response = client.prepareSearch("news").setTypes("article").setQuery(QueryBuilders.termQuery("content","内存")).get();
+        SearchResponse response = client.prepareSearch("news").setTypes("article").setQuery(QueryBuilders.termQuery("title","Redis")).get();
         // 获取查询的对象（文档），获取命中次数，查询结果有多少对象
         SearchHits hits = response.getHits();
         // 打印查询结果条目
@@ -85,11 +109,11 @@ public class QueryTest {
         while (iterator.hasNext()){
             System.out.println((iterator.next()).getSourceAsString());
         }
-        // 关闭资源
-        client.close();
     }
 
-    // 通配符查询
+    /**
+     * 通配符查询
+     */
     @Test
     public void wildcardQuery(){
         // 查询
@@ -103,9 +127,26 @@ public class QueryTest {
         while (iterator.hasNext()){
             System.out.println((iterator.next()).getSourceAsString());
         }
-        // 关闭资源
-        client.close();
     }
+
+    /**
+     * 前缀查询
+     */
+    @Test
+    public void prefixQuery(){
+        PrefixQueryBuilder prefixQueryBuilder = QueryBuilders.prefixQuery("content", "ElasticSearch");
+        SearchResponse response = client.prepareSearch("news").setTypes("article").setQuery(prefixQueryBuilder).get();
+        // 获取查询的对象（文档），获取命中次数，查询结果有多少对象
+        SearchHits hits = response.getHits();
+        // 打印查询结果条目
+        System.out.println("查询结果为："+hits.getTotalHits());
+        // 遍历打印文档内容
+        Iterator<SearchHit> iterator = hits.iterator();
+        while (iterator.hasNext()){
+            System.out.println((iterator.next()).getSourceAsString());
+        }
+    }
+
 
     // 模糊查询
     @Test
@@ -121,8 +162,6 @@ public class QueryTest {
         while (iterator.hasNext()){
             System.out.println((iterator.next()).getSourceAsString());
         }
-        // 关闭资源
-        client.close();
     }
 
 }

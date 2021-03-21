@@ -10,8 +10,9 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +38,12 @@ public class DocumentTest {
         Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
         // 获取客户流对象
         client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("172.20.1.91"),9300));
+        client.addTransportAddress(new TransportAddress(InetAddress.getByName("103.46.128.20"),36921));
+    }
+
+    @After
+    public void closeClient(){
+        client.close();
     }
 
     // 创建文档
@@ -55,19 +61,17 @@ public class DocumentTest {
         System.out.println("id:"+response.getId());
         System.out.println("版本:"+response.getVersion());
         System.out.println("结果:"+response.getResult());
-        // 关闭资源
-        client.close();
     }
 
-    // 查询单个索引
+    /**
+     * 通过id获取数据
+     */
     @Test
     public void queryIndexByOne(){
         // 查询
         GetResponse response = client.prepareGet("news", "article", "1").get();
         // 打印
         System.out.println(response.getSourceAsString());
-        // 关闭资源
-        client.close();
     }
 
     // 查询多个索引
@@ -85,8 +89,6 @@ public class DocumentTest {
                 System.out.println(item.getSourceAsString());
             }
         }
-        // 释放资源
-        client.close();
     }
 
     // 更新文档
@@ -103,8 +105,6 @@ public class DocumentTest {
         System.out.println("id:"+response.getId());
         System.out.println("版本:"+response.getVersion());
         System.out.println("结果:"+response.getResult());
-        // 关闭资源
-        client.close();
     }
 
     // 更新文档(如果要更新的文档不存在，则插入一条)
@@ -128,8 +128,6 @@ public class DocumentTest {
         System.out.println("id:"+response.getId());
         System.out.println("版本:"+response.getVersion());
         System.out.println("结果:"+response.getResult());
-        // 关闭资源
-        client.close();
     }
 
     // 删除文档
@@ -142,8 +140,6 @@ public class DocumentTest {
         System.out.println("id:"+response.getId());
         System.out.println("版本:"+response.getVersion());
         System.out.println("结果:"+response.getResult());
-        // 关闭资源
-        client.close();
     }
 
 }

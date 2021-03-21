@@ -1,7 +1,7 @@
 package ac.cn.saya.elasticsearch.api.index;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +27,7 @@ public class IndexTest {
         Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
         // 获取客户流对象
         client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("172.20.1.91"),9300));
+        client.addTransportAddress(new TransportAddress(InetAddress.getByName("172.20.1.91"),9300));
     }
 
     @Test

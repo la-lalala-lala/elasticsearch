@@ -1,7 +1,8 @@
 package ac.cn.saya.elasticsearch.api.connection;
 
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.Test;
 
@@ -23,9 +24,13 @@ public class ConnectionTest {
     public void getClient() throws UnknownHostException {
         Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
         // 获取客户流对象
-        PreBuiltTransportClient client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("172.20.1.91"),9300));
+        //从创建一个 客户端
+        TransportClient client = new PreBuiltTransportClient(settings);
+        //设置操作es服务主机及端口号
+        client.addTransportAddress(new TransportAddress(InetAddress.getByName("103.46.128.20"),36921));
         System.out.println(client.toString());
     }
+
+
 
 }
