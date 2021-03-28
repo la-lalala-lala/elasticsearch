@@ -73,3 +73,284 @@ docker pull kibana:7.4.0
 docker run -d -e ELASTICSEARCH_HOSTS=http://118.24.198.239:9200 -p 8080:5601 --name kibana  0328df36f79f
 ```
 
+8.Kibana测试
+## 检索索引
+
+GET bank/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "balance": {
+        "order": "desc"
+      }
+    }
+  ],
+  "from": 0,
+  "size": 10,
+  "_source": ["balance","firstname",""]
+}
+
+
+## 分词匹配
+
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "address": "Place"
+    }
+  }
+}
+
+## 完整匹配
+
+GET bank/_search
+{
+  "query": {
+    "match_phrase": {
+      "address": "mill road"
+    }
+  }
+}
+
+## 多词匹配
+
+GET bank/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "mill",
+      "fields": ["address","city"]
+    }
+  }
+}
+
+## 布尔查询(must:必须满足;must_not:必须不满足;should:尽量匹配，匹配不上也行)
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"match": {
+          "gender": "M"
+        }},
+        {"match": {
+          "address": "Mill"
+        }}
+      ],
+      "must_not": [
+        {"match": {
+          "age": "28"
+        }}
+      ],
+      "should": [
+        {"match": {
+          "lastname": "Wallace"
+        }}
+      ]
+    }
+  }
+}
+
+## 范围查询
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"range": {
+          "age": {
+            "gte": 10,
+            "lte": 30
+          }
+        }}
+      ]
+    }
+  }
+}
+
+## 利用filter进行过滤查询，此时不会计算相关得分，直接进行过滤
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "age": {
+            "gte": 10,
+            "lte": 30
+          }
+        }
+      }
+    }
+  }
+}
+
+## 利用term进行精准匹配，适合于数值及布尔型(非text)，对于字符串进行全文匹配，不是很适合
+
+GET bank/_search
+{
+  "query": {
+    "term": {
+      "age": {
+        "value": 28
+      }
+    }
+  }
+}
+
+## 利用字段.keyword进行精准匹配，必须完全相等
+
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "address.keyword": "789 Madison"
+    }
+  }
+}
+
+## 利用match_phrase进行全文匹配，此时的查询条件不会被分词，只要含有这个完整的条件才会检索到
+
+GET bank/_search
+{
+  "query": {
+    "match_phrase": {
+      "address": "789 Madison"
+    }
+  }
+}
+
+## 搜索address中包含mill的所有人的年龄分布及平均年龄
+
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "address": "mill"
+    }
+  },
+  "aggs": {
+    "groupAge": {
+      "terms": {
+        "field": "age",
+        "size": 10
+      }
+    },
+    "ageAvg":{
+      "avg": {
+        "field": "age"
+      }
+    }
+  }
+}
+
+## 按照年龄进行分组聚合，并且统计这些年龄段的这些人的平均薪资
+
+GET bank/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 0, 
+  "aggs": {
+    "groupAge": {
+      "terms": {
+        "field": "age",
+        "size": 100
+      },
+      "aggs": {
+        "ageAvg": {
+          "avg": {
+            "field": "age"
+          }
+        }
+      }
+    }
+  }
+}
+
+## 查出所有年龄分布，并且这些年龄段中男女的平均薪资，以及这个年龄段的整体平均薪资
+
+GET bank/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 0,
+  "aggs": {
+    "groupAge": {
+      "terms": {
+        "field": "age",
+        "size": 100
+      },
+      "aggs": {
+        "groupGender": {
+          "terms": {
+            "field": "gender.keyword",
+            "size": 10
+          },
+          "aggs": {
+            "avgBalance": {
+              "avg": {
+                "field": "balance"
+              }
+            }
+          }
+        },
+        "avgBalance":{
+          "avg": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET user/_mapping
+
+## 创建索引，并指定映射
+
+PUT /user
+{
+  "mappings": {
+    "properties": {
+      "name":{"type": "text"},
+      "account":{"type": "keyword"},
+      "passwprd":{"type": "keyword"},
+      "sex":{"type": "boolean"},
+      "age":{"type": "integer"},
+      "email":{"type": "keyword"},
+      "phone":{"type": "keyword"}
+    }
+  }
+}
+
+## 添加新的字段映射
+
+PUT /user/_mapping
+{
+  "properties":{
+    "schools":{
+      "type":"nested"
+    }
+  }
+}
+
+
+
+## 测试ik分词器
+
+POST _analyze
+{
+  "analyzer": "ik_max_word",
+  "text":"国家电网公司"
+}
+

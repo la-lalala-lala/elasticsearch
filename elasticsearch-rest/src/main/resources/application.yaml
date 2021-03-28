@@ -1,6 +1,6 @@
 es:
-  host: 103.46.128.49
-  port: 26574
+  host: 118.24.198.239
+  port: 9200
   scheme: http
 server:
   port: 9000
