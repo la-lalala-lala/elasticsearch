@@ -1,15 +1,13 @@
 package ac.cn.saya.elasticsearch.rest;
 
 import ac.cn.saya.elasticsearch.rest.config.ESRestClientConfig;
-import ac.cn.saya.elasticsearch.rest.entity.UserEntity;
-import ac.cn.saya.elasticsearch.rest.tools.BaseElasticDao;
+import ac.cn.saya.elasticsearch.rest.entity.UserEntityElasticSearch;
 import ac.cn.saya.elasticsearch.rest.tools.JackJsonUtil;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
@@ -29,7 +27,7 @@ public class CreateIndexTest {
 
     @Test
     public void addIndex() throws Exception{
-        UserEntity user = new UserEntity();
+        UserEntityElasticSearch user = new UserEntityElasticSearch();
         user.setId(1);
         user.setName("saya");
         user.setAccount("Pandora");
@@ -41,7 +39,7 @@ public class CreateIndexTest {
 
         IndexRequest userRequest = new IndexRequest("user");
         userRequest.id((user.getId()).toString());
-        String json = JackJsonUtil.toJson(user);
+        String json = JackJsonUtil.toJson(user,false);
         userRequest.source(json, XContentType.JSON);
         IndexResponse index = client.index(userRequest, ESRestClientConfig.COMMON_OPTIONS);
         System.out.println(index);

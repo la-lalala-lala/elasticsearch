@@ -3,7 +3,7 @@ package ac.cn.saya.elasticsearch.rest.entity;
 import java.io.Serializable;
 
 /**
- * @Title: UserEntity
+ * @Title: UserEntityElasticSearch
  * @ProjectName elasticsearch
  * @Author saya
  * @Date: 2021/3/28 17:50
@@ -18,7 +18,7 @@ import java.io.Serializable;
  *       "phone":{"type": "keyword"}
  */
 
-public class UserEntity implements Serializable {
+public class UserEntityElasticSearch implements Serializable{
 
     private static final long serialVersionUID = 5559523739520543306L;
     
@@ -31,7 +31,7 @@ public class UserEntity implements Serializable {
     private String email;
     private String phone;
 
-    public UserEntity() {
+    public UserEntityElasticSearch() {
     }
 
     public Integer getId() {

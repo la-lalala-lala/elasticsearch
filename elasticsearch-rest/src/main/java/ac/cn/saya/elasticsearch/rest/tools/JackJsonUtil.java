@@ -1,5 +1,6 @@
 package ac.cn.saya.elasticsearch.rest.tools;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -78,13 +79,19 @@ public class JackJsonUtil {
     /**
      * 对象转Json格式字符串
      * @param object 对象
+     * @param model true：全量序列化，false：为空时不给予序列化
      * @return Json格式字符串
      */
-    public static <T> String toJson(T object) {
+    public static <T> String toJson(T object,boolean model) {
         if (null == object){
             return null;
         }
         try {
+            if (!model){
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                return object instanceof String ? (String) object :mapper.writeValueAsString(object);
+            }
             return object instanceof String ? (String) object :(JackJsonUtil.getInstance().objectMapper).writeValueAsString(object);
         } catch (Exception e) {
             e.printStackTrace();
