@@ -76,7 +76,7 @@ public class ElasticSearchDao {
         List<Map<String,Object>> rs = new ArrayList<>();
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        int from = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
+        int from = Math.max((pageNum - 1) * pageSize, 0);
         sourceBuilder.from(from);
         sourceBuilder.size(pageSize);
         sourceBuilder.query(query);
